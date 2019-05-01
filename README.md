@@ -9,9 +9,8 @@ This application is a simple implementation of REST API written in Flask Python.
 
 **PostgreSQL** - _used as a data storage._
 
-**GCP account** - _used to create a GKE cluster for deploying Nginx and taskAPI application. Also used to create a database instance in Cloud SQL for PostgreSQL and GCR for storing docker images._
-\
-\
+**GCP account** - _used to create a GKE cluster for deploying Nginx and taskAPI application. Also used to create a database instance in Cloud SQL for PostgreSQL and GCR for storing docker images._<br><br>
+
 **Host Recipes**:
 
 The following tools must be installed and configured in your local machine: **jq, git, curl, psql, docker, gcloud, kubectl and helm**.
