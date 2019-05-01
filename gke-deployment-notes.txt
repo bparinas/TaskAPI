@@ -178,6 +178,18 @@ To prevent this, run `helm init` with the --tiller-tls-verify flag.
 For more information on securing your installation see: https://docs.helm.sh/using_helm/#securing-your-helm-installation
 Happy Helming!
 
+*verify if tiller-deploy deployment in kube-system namespace is running 
+$ kubectl get deployments -n kube-system
+NAME                     DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+event-exporter-v0.2.3    1         1         1            1           7h
+fluentd-gcp-scaler       1         1         1            1           7h
+heapster-v1.6.0-beta.1   1         1         1            1           7h
+kube-dns                 2         2         2            2           7h
+kube-dns-autoscaler      1         1         1            1           7h
+l7-default-backend       1         1         1            1           7h
+metrics-server-v0.2.1    1         1         1            1           7h
+tiller-deploy            1         1         1            1           6h
+
 
 7.  create db instance with the postgresql engine
 https://cloud.google.com/sql/docs/postgres/create-instance
