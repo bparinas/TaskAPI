@@ -464,3 +464,47 @@ cc7c954a8c83: Mounted from google-appengine/python
 0.0.1: digest: sha256:bfdb8879bf71b7747baf2663ea9e850af46b49ed078e9eaec7826d8d4236d759 size: 3459
 
 
+*deploy taskapi and nginx using helm
+$ helm upgrade taskapi --install --wait taskapi \
+> --set image=$IMAGE_NAME,imageTag=$IMAGE_TAG \
+> --set database.host=$DATABASE_HOST \
+> --set database.name=$DATABASE_NAME \
+> --set database.user=$DATABASE_USER,database.pass=$DATABASE_PASS
+Release "taskapi" does not exist. Installing it now.
+NAME:   taskapi
+LAST DEPLOYED: Wed May  1 17:30:19 2019
+NAMESPACE: default
+STATUS: DEPLOYED
+
+RESOURCES:
+==> v1/ConfigMap
+NAME            DATA  AGE
+taskapi-config  3     55s
+
+==> v1/Pod(related)
+NAME                     READY  STATUS             RESTARTS  AGE
+taskapi-6bf95d455-5ghnj  1/1    Running            0         55s
+taskapi-6bf95d455-ddmd2  0/1    ContainerCreating  0         55s
+taskapi-6bf95d455-q2jwt  1/1    Running            0         55s
+
+==> v1/Secret
+NAME            TYPE    DATA  AGE
+taskapi-secret  Opaque  1     55s
+
+==> v1/Service
+NAME     TYPE       CLUSTER-IP    EXTERNAL-IP  PORT(S)   AGE
+taskapi  ClusterIP  10.3.249.122  <none>       5000/TCP  55s
+
+==> v1beta1/Deployment
+NAME     READY  UP-TO-DATE  AVAILABLE  AGE
+taskapi  2/3    3           2          55s
+
+*verify 3 replicas of taskapi
+$ kubectl get pods
+NAME                      READY   STATUS    RESTARTS   AGE
+taskapi-6bf95d455-5ghnj   1/1     Running   0          3m
+taskapi-6bf95d455-ddmd2   1/1     Running   0          3m
+taskapi-6bf95d455-q2jwt   1/1     Running   0          3m
+
+
+
