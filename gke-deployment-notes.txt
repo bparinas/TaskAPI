@@ -11,8 +11,8 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 
 
-2. install gcloud & kubectl cli 
-yum install -y google-cloud-sdk kubectl jq
+2. install gcloud, kubectl, jq & postgresql cli 
+yum install -y google-cloud-sdk kubectl jq postgresql
 
 
 3. before using gcloud set project & compute zone
@@ -264,5 +264,17 @@ Updated [https://www.googleapis.com/sql/v1beta4/projects/taskapi-239309/instance
 *set DB Host IP environment variable.
 $ export DATABASE_HOST_IP=$(gcloud sql instances list --filter name=taskapi-psqldb --format json | jq -r '.[].ipAddresses[] | select(.type=="PRIMARY") | .ipAddress')
 
+*set postgres user password.
+$ gcloud sql users set-password postgres --instance=taskapi-psqldb --password=$PGPASSWORD
+Updating Cloud SQL user...done.
 
+*add user for accessing taskapi db.
+$ psql -h $DATABASE_HOST_IP -U postgres -d postgres -c "CREATE USER \"$DATABASE_USER\" WITH ENCRYPTED PASSWORD '$DATABASE_PASS'"   CREATE ROLE
 
+*grant all privileges to the user on taskapi db.
+$ psql -h $DATABASE_HOST_IP -U postgres -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE $DATABASE_NAME TO $DATABASE_USER"
+GRANT
+
+*create a table for storing information about users.
+$ psql -h $DATABASE_HOST_IP -U taskapi -d taskapi -c "CREATE TABLE users (user_id serial PRIMARY KEY, user_name VARCHAR(64) UNIQUE NOT NULL, user_birthdate DATE NOT NULL)"
+CREATE TABLE
