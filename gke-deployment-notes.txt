@@ -10,8 +10,10 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 
+
 2. install gcloud & kubectl cli 
-yum install -y google-cloud-sdk kubectl
+yum install -y google-cloud-sdk kubectl jq
+
 
 3. before using gcloud set project & compute zone
 https://cloud.google.com/resource-manager/docs/creating-managing-projects
@@ -110,6 +112,7 @@ $ gcloud config configurations list
 NAME     IS_ACTIVE  ACCOUNT          PROJECT         DEFAULT_ZONE    DEFAULT_REGION
 default  True       bernard@arpa.ph  taskapi-239309  europe-west2-b  europe-west2
 
+
 4. create GKE cluster
 https://cloud.google.com/kubernetes-engine/docs/quickstart
 
@@ -122,20 +125,23 @@ kubeconfig entry generated for taskapi-cluster.
 NAME             LOCATION        MASTER_VERSION  MASTER_IP      MACHINE_TYPE  NODE_VERSION  NUM_NODES  STATUS
 taskapi-cluster  europe-west2-b  1.11.8-gke.6    35.246.18.169  g1-small      1.11.8-gke.6  3          RUNNING
 
+
 5. authenticate into the cluster
 $ gcloud container clusters get-credentials taskapi-cluster
 Fetching cluster endpoint and auth data.
 kubeconfig entry generated for taskapi-cluster.
 
-
+*create service account
 $ kubectl create serviceaccount --namespace kube-system tiller
 serviceaccount/tiller created
 
+*bind service account to admin
 $ kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 clusterrolebinding.rbac.authorization.k8s.io/tiller-cluster-admin created
 
 
-* install helm
+6. install helm and initialize
+*install helm
 
 $ curl -LO https://git.io/get_helm.sh
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
@@ -173,7 +179,7 @@ For more information on securing your installation see: https://docs.helm.sh/usi
 Happy Helming!
 
 
-* create db instance with the postgresql engine
+7.  create db instance with the postgresql engine
 https://cloud.google.com/sql/docs/postgres/create-instance
 $ gcloud sql instances create taskapi-psqldb --database-version=POSTGRES_9_6 --tier db-g1-small
 
@@ -183,7 +189,7 @@ NAME            DATABASE_VERSION  LOCATION       TIER         PRIMARY_ADDRESS  P
 taskapi-psqldb  POSTGRES_9_6      us-central1-a  db-g1-small  34.66.189.70     -                RUNNABLE
 
 
-* delete db instance (do not do this in production. GCP policy, you have to wait for 2 months before you can reuse the same instance name) 
+*delete db instance (do not do this in production. GCP policy, you have to wait for 2 months before you can reuse the same instance name) 
 $ gcloud sql instances delete taskapi-db
 All of the instance data will be lost when the instance is deleted.
 
@@ -193,9 +199,7 @@ Deleting Cloud SQL instance...done.
 Deleted [https://www.googleapis.com/sql/v1beta4/projects/taskapi-239309/instances/taskapi-db].
 
 
-
-
-
+8. set gcr docker credential helper with docker-credential-gcr
 install google container registry's docker credential helper
 $ cat docker-credential-gcr.sh
 #!/bin/bash
@@ -207,9 +211,7 @@ curl -fsSL "https://github.com/GoogleCloudPlatform/docker-credential-gcr/release
   | tar xz --to-stdout ./docker-credential-gcr \
   | sudo tee /usr/bin/docker-credential-gcr > /dev/null && sudo chmod +x /usr/bin/docker-credential-gcr
 
-
-
-non-privileged account must be a member of docker group
+*note non-privileged account must be a member of docker group
 $ docker-credential-gcr configure-docker
 /home/nullx/.docker/config.json configured to use this credential helper for GCR registries
 
@@ -226,5 +228,41 @@ $ cat /home/nullx/.docker/config.json
         }
 }
 
-*install jq 
-$ sudo yum install -y jq
+
+9. set environment variables
+file: env.sh (chmod +x env.sh)
+
+#!/bin/bash
+
+MY_EXTERNAL_IP="167.99.92.220"
+PGPASSWORD="taskapidb"
+DATABASE_NAME="taskapi"
+DATABASE_USER="taskapi"
+DATABASE_PASS="taskapi"
+IMAGE_NAME=gcr.io/taskapi-239309/taskapi
+IMAGE_TAG=0.0.1
+
+export MY_EXTERNAL_IP PGPASSWORD DATABASE_NAME DATABASE_USER DATABASE_PASS IMAGE_NAME IMAGE_TAG
+
+$ source env.sh
+$ ./env.sh
+
+*update the DB authorized networks with the K&s nodes external IPs & your local machine external IP.
+$ gcloud sql instances patch taskapi-psqldb --authorized-networks=$(kubectl get nodes -o json | jq -r '.items[].status.addresses[] | select(.type=="ExternalIP") | { address: .address }' | jq -rs "[.[][]] + [\"$MY_EXTERNAL_IP\"] | join(\",\")")
+When adding a new IP address to authorized networks, make sure to also
+ include any IP addresses that have already been authorized.
+Otherwise, they will be overwritten and de-authorized.
+
+Do you want to continue (Y/n)?  Y
+
+The following message will be used for the patch API method.
+{"project": "taskapi-239309", "name": "taskapi-psqldb", "settings": {"ipConfiguration": {"authorizedNetworks": [{"value": "35.242.156.25"}, {"value": "35.242.188.92"}, {"value": "35.197.226.170"}, {"value": "167.99.92.220"}]}}}
+
+Patching Cloud SQL instance...done.
+Updated [https://www.googleapis.com/sql/v1beta4/projects/taskapi-239309/instances/taskapi-psqldb].
+
+*set DB Host environment variable.
+
+
+
+
