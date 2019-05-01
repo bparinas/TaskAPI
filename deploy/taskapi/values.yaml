@@ -16,3 +16,4 @@ database:
   name: taskapi
   user: taskapi
   pass: taskapi
+
