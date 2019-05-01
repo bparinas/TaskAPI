@@ -281,7 +281,7 @@ $ psql -h $DATABASE_HOST_IP -U taskapi -d taskapi -c "CREATE TABLE users (user_i
 CREATE TABLE
 
 
-10. Build taskapi docker image.
+10. Build taskapi docker image and Push image to GCR.
 *authenticate to google container registry (gcr)
 $ gcloud auth configure-docker
 WARNING: Your config file at [/home/nullx/.docker/config.json] contains these credential helper entries:
@@ -430,3 +430,25 @@ Removing intermediate container 3af1c2ee874b
  ---> 03eff9cbf264
 Successfully built 03eff9cbf264
 Successfully tagged gcr.io/taskapi-239309/taskapi:0.0.1
+
+*push image to GCR
+$ docker push $IMAGE_NAME:$IMAGE_TAG
+The push refers to repository [gcr.io/taskapi-239309/taskapi]
+36eda45f29e5: Pushed
+20f5139dda79: Pushed
+90ea61e597e4: Pushed
+5ff9e1200c7d: Pushed
+8e409ae08c8f: Mounted from google-appengine/python
+159474cc3d65: Mounted from google-appengine/python
+a72485f2a9da: Mounted from google-appengine/python
+51a98f3fc0af: Mounted from google-appengine/python
+9ce752fc3ec7: Mounted from google-appengine/python
+9cebe67bbde6: Mounted from google-appengine/python
+e3581b7a4e13: Mounted from google-appengine/python
+39510a9097a6: Mounted from google-appengine/python
+84ff92691f90: Mounted from google-appengine/python
+d28022003f06: Mounted from google-appengine/python
+cc7c954a8c83: Mounted from google-appengine/python
+0.0.1: digest: sha256:bfdb8879bf71b7747baf2663ea9e850af46b49ed078e9eaec7826d8d4236d759 size: 3459
+
+
