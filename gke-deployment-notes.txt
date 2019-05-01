@@ -506,5 +506,30 @@ taskapi-6bf95d455-5ghnj   1/1     Running   0          3m
 taskapi-6bf95d455-ddmd2   1/1     Running   0          3m
 taskapi-6bf95d455-q2jwt   1/1     Running   0          3m
 
+*deploy nginx
+$ helm upgrade nginx --install --wait nginx
+Release "nginx" does not exist. Installing it now.
+NAME:   nginx
+LAST DEPLOYED: Wed May  1 17:36:18 2019
+NAMESPACE: default
+STATUS: DEPLOYED
 
+RESOURCES:
+==> v1/ConfigMap
+NAME         DATA  AGE
+nginx-hosts  1     60s
+
+==> v1/Pod(related)
+NAME                    READY  STATUS   RESTARTS  AGE
+nginx-6f7c5bbd74-9c7jv  1/1    Running  0         60s
+nginx-6f7c5bbd74-jfst6  1/1    Running  0         60s
+nginx-6f7c5bbd74-lw2mj  1/1    Running  0         60s
+
+==> v1/Service
+NAME   TYPE          CLUSTER-IP    EXTERNAL-IP     PORT(S)       AGE
+nginx  LoadBalancer  10.3.241.206  35.242.183.131  80:31288/TCP  60s
+
+==> v1beta1/Deployment
+NAME   READY  UP-TO-DATE  AVAILABLE  AGE
+nginx  3/3    3           3          60s
 
