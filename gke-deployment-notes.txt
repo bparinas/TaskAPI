@@ -261,8 +261,8 @@ The following message will be used for the patch API method.
 Patching Cloud SQL instance...done.
 Updated [https://www.googleapis.com/sql/v1beta4/projects/taskapi-239309/instances/taskapi-psqldb].
 
-*set DB Host environment variable.
-
+*set DB Host IP environment variable.
+$ export DATABASE_HOST_IP=$(gcloud sql instances list --filter name=taskapi-psqldb --format json | jq -r '.[].ipAddresses[] | select(.type=="PRIMARY") | .ipAddress')
 
 
 
