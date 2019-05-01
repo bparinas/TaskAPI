@@ -1,0 +1,18 @@
+## The application name
+appName: taskapi
+
+## The application service ports
+apiPort: 5000
+
+## Pod settings
+replicas: 3
+image: "taskapi"
+imageTag: "latest"
+imagePullPolicy: "Always"
+
+## Settings for a connection to a PostgreSQL database
+database:
+  host: 34.66.189.70
+  name: taskapi
+  user: taskapi
+  pass: taskapi
