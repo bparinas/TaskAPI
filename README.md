@@ -1,4 +1,4 @@
-# taskAPI
+# TaskAPI
 This application is a simple implementation of REST API written in Flask Python. It takes a user name and his/her birthdate and stores them in a database. If the user already exists in the database, it prints how many days until user's next birthday.<br><br>
 
 **[Cloud Recipes]**:
