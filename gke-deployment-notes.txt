@@ -588,7 +588,7 @@ Content-Length: 3
 Connection: keep-alive
 
 {}
-[nullx@centos-s-4vcpu-8gb-lon1-01 deploy]$ curl -i -X GET http://$API_HOST/hello/John
+$ curl -i -X GET http://$API_HOST/hello/John
 HTTP/1.1 200 OK
 Server: nginx/1.15.12
 Date: Wed, 01 May 2019 18:44:34 GMT

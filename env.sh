@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 #replace with your personal public ip
-MY_EXTERNAL_IP=167.99.92.220
+MY_EXTERNAL_IP=<use-your-own-public-ip>
 
 #set your psql password
 PGPASSWORD="taskapidb"

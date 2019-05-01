@@ -1,4 +1,3 @@
-
 from os import environ
 from datetime import date, datetime
 from flask import Flask
