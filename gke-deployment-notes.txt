@@ -201,7 +201,7 @@ Deleted [https://www.googleapis.com/sql/v1beta4/projects/taskapi-239309/instance
 
 8. set gcr docker credential helper with docker-credential-gcr
 install google container registry's docker credential helper
-$ cat docker-credential-gcr.sh
+$ cat docker-credential-gcr.sh (chmod +x docker-credential-gcr.sh)
 #!/bin/bash
 
 VERSION=1.5.0
@@ -269,7 +269,8 @@ $ gcloud sql users set-password postgres --instance=taskapi-psqldb --password=$P
 Updating Cloud SQL user...done.
 
 *add user for accessing taskapi db.
-$ psql -h $DATABASE_HOST_IP -U postgres -d postgres -c "CREATE USER \"$DATABASE_USER\" WITH ENCRYPTED PASSWORD '$DATABASE_PASS'"   CREATE ROLE
+$ psql -h $DATABASE_HOST_IP -U postgres -d postgres -c "CREATE USER \"$DATABASE_USER\" WITH ENCRYPTED PASSWORD '$DATABASE_PASS'"
+CREATE ROLE
 
 *grant all privileges to the user on taskapi db.
 $ psql -h $DATABASE_HOST_IP -U postgres -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE $DATABASE_NAME TO $DATABASE_USER"
@@ -278,3 +279,52 @@ GRANT
 *create a table for storing information about users.
 $ psql -h $DATABASE_HOST_IP -U taskapi -d taskapi -c "CREATE TABLE users (user_id serial PRIMARY KEY, user_name VARCHAR(64) UNIQUE NOT NULL, user_birthdate DATE NOT NULL)"
 CREATE TABLE
+
+
+10. Build taskapi docker image.
+*authenticate to google container registry (gcr)
+$ gcloud auth configure-docker
+WARNING: Your config file at [/home/nullx/.docker/config.json] contains these credential helper entries:
+
+{
+  "credHelpers": {
+    "us.gcr.io": "gcr",
+    "staging-k8s.gcr.io": "gcr",
+    "asia.gcr.io": "gcr",
+    "gcr.io": "gcr",
+    "marketplace.gcr.io": "gcloud",
+    "eu.gcr.io": "gcr"
+  }
+}
+These will be overwritten.
+The following settings will be added to your Docker config file
+located at [/home/nullx/.docker/config.json]:
+ {
+  "credHelpers": {
+    "gcr.io": "gcloud",
+    "us.gcr.io": "gcloud",
+    "eu.gcr.io": "gcloud",
+    "asia.gcr.io": "gcloud",
+    "staging-k8s.gcr.io": "gcloud",
+    "marketplace.gcr.io": "gcloud"
+  }
+}
+
+Do you want to continue (Y/n)?  Y
+
+Docker configuration file updated.
+$ cat /home/nullx/.docker/config.json
+{
+  "auths": {},
+  "credHelpers": {
+    "gcr.io": "gcloud",
+    "us.gcr.io": "gcloud",
+    "eu.gcr.io": "gcloud",
+    "asia.gcr.io": "gcloud",
+    "staging-k8s.gcr.io": "gcloud",
+    "marketplace.gcr.io": "gcloud"
+  }
+}
+
+*create your Dockerfile
+
