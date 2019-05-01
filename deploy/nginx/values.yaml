@@ -14,3 +14,4 @@ imagePullPolicy: "Always"
 service:
   type: LoadBalancer
 
+
