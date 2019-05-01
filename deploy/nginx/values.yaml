@@ -13,3 +13,4 @@ imagePullPolicy: "Always"
 ## Expose
 service:
   type: LoadBalancer
+
