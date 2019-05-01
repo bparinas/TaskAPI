@@ -327,4 +327,106 @@ $ cat /home/nullx/.docker/config.json
 }
 
 *create your Dockerfile
+FROM gcr.io/google-appengine/python
+RUN virtualenv -p python3.6 /env
+ENV VIRTUAL_ENV /env
+ENV PATH /env/bin:$PATH
+ADD requirements.txt /app/requirements.txt
+RUN pip install -r /app/requirements.txt
+ADD . /app
+WORKDIR /app
+EXPOSE 5000
+CMD ["python", "taskapi.py"]
 
+
+*build the taskapi image
+$ docker build --no-cache -t $IMAGE_NAME:$IMAGE_TAG .
+Sending build context to Docker daemon  9.728kB
+Step 1/10 : FROM gcr.io/google-appengine/python
+latest: Pulling from google-appengine/python
+4c72b62cb1fa: Pull complete
+32f1d5119664: Pull complete
+3c2cba919283: Pull complete
+b213663d7428: Pull complete
+8d127fef2639: Pull complete
+084162bd1447: Pull complete
+bcdd255b5133: Pull complete
+51dbbab2b586: Pull complete
+33368486d4c3: Pull complete
+fb8fc9b35779: Pull complete
+34f183c44b33: Pull complete
+Digest: sha256:a37fa639051f76764c942a1a2e067e8c51f9a53c25c71c67ac9047ca53f239ec
+Status: Downloaded newer image for gcr.io/google-appengine/python:latest
+ ---> c6d0683c1c6b
+Step 2/10 : RUN virtualenv -p python3.6 /env
+ ---> Running in dc2ba19c80b9
+Running virtualenv with interpreter /opt/python3.6/bin/python3.6
+Using base prefix '/opt/python3.6'
+New python executable in /env/bin/python3.6
+Also creating executable in /env/bin/python
+Installing setuptools, pip, wheel...done.
+Removing intermediate container dc2ba19c80b9
+ ---> 77c8f00976fe
+Step 3/10 : ENV VIRTUAL_ENV /env
+ ---> Running in 2646ac97588a
+Removing intermediate container 2646ac97588a
+ ---> 58004275ea7b
+Step 4/10 : ENV PATH /env/bin:$PATH
+ ---> Running in ee2f76575329
+Removing intermediate container ee2f76575329
+ ---> 418f6ad79626
+Step 5/10 : ADD requirements.txt /app/requirements.txt
+ ---> 4caf04086c5a
+Step 6/10 : RUN pip install -r /app/requirements.txt
+ ---> Running in 81ec5fa0fde4
+Collecting flask (from -r /app/requirements.txt (line 1))
+  Downloading https://files.pythonhosted.org/packages/7f/e7/08578774ed4536d3242b14dacb4696386634607af824ea997202cd0edb4b/Flask-1.0.2-py2.py3-none-any.whl (91kB)
+Collecting flask-restful (from -r /app/requirements.txt (line 2))
+  Downloading https://files.pythonhosted.org/packages/17/44/6e490150ee443ca81d5f88b61bb4bbb133d44d75b0b716ebe92489508da4/Flask_RESTful-0.3.7-py2.py3-none-any.whl
+Collecting flask-sqlalchemy (from -r /app/requirements.txt (line 3))
+  Downloading https://files.pythonhosted.org/packages/08/ca/582442cad71504a1514a2f053006c8bb128844133d6076a4df17117545fa/Flask_SQLAlchemy-2.4.0-py2.py3-none-any.whl
+Collecting psycopg2-binary (from -r /app/requirements.txt (line 4))
+  Downloading https://files.pythonhosted.org/packages/e9/6e/f2ea78572ab734fb18b35e7ac6805d7889bdfe0fa00b188c4a5f0cb3e6e1/psycopg2_binary-2.8.2-cp36-cp36m-manylinux1_x86_64.whl (2.9MB)
+Collecting click>=5.1 (from flask->-r /app/requirements.txt (line 1))
+  Downloading https://files.pythonhosted.org/packages/fa/37/45185cb5abbc30d7257104c434fe0b07e5a195a6847506c074527aa599ec/Click-7.0-py2.py3-none-any.whl (81kB)
+Collecting itsdangerous>=0.24 (from flask->-r /app/requirements.txt (line 1))
+  Downloading https://files.pythonhosted.org/packages/76/ae/44b03b253d6fade317f32c24d100b3b35c2239807046a4c953c7b89fa49e/itsdangerous-1.1.0-py2.py3-none-any.whl
+Collecting Werkzeug>=0.14 (from flask->-r /app/requirements.txt (line 1))
+  Downloading https://files.pythonhosted.org/packages/18/79/84f02539cc181cdbf5ff5a41b9f52cae870b6f632767e43ba6ac70132e92/Werkzeug-0.15.2-py2.py3-none-any.whl (328kB)
+Collecting Jinja2>=2.10 (from flask->-r /app/requirements.txt (line 1))
+  Downloading https://files.pythonhosted.org/packages/1d/e7/fd8b501e7a6dfe492a433deb7b9d833d39ca74916fa8bc63dd1a4947a671/Jinja2-2.10.1-py2.py3-none-any.whl (124kB)
+Collecting six>=1.3.0 (from flask-restful->-r /app/requirements.txt (line 2))
+  Downloading https://files.pythonhosted.org/packages/73/fb/00a976f728d0d1fecfe898238ce23f502a721c0ac0ecfedb80e0d88c64e9/six-1.12.0-py2.py3-none-any.whl
+Collecting aniso8601>=0.82 (from flask-restful->-r /app/requirements.txt (line 2))
+  Downloading https://files.pythonhosted.org/packages/85/58/1e804d6d53435b1b2241036056360575640b69a332e7ead086a04bd5ad95/aniso8601-6.0.0-py2.py3-none-any.whl (41kB)
+Collecting pytz (from flask-restful->-r /app/requirements.txt (line 2))
+  Downloading https://files.pythonhosted.org/packages/3d/73/fe30c2daaaa0713420d0382b16fbb761409f532c56bdcc514bf7b6262bb6/pytz-2019.1-py2.py3-none-any.whl (510kB)
+Collecting SQLAlchemy>=0.8.0 (from flask-sqlalchemy->-r /app/requirements.txt (line 3))
+  Downloading https://files.pythonhosted.org/packages/2b/b2/e6f5c5efc68942edefaa924e8fbea0b32375baa434a511cbf6bb17769cf6/SQLAlchemy-1.3.3.tar.gz (5.9MB)
+Collecting MarkupSafe>=0.23 (from Jinja2>=2.10->flask->-r /app/requirements.txt (line 1))
+  Downloading https://files.pythonhosted.org/packages/b2/5f/23e0023be6bb885d00ffbefad2942bc51a620328ee910f64abe5a8d18dd1/MarkupSafe-1.1.1-cp36-cp36m-manylinux1_x86_64.whl
+Building wheels for collected packages: SQLAlchemy
+  Building wheel for SQLAlchemy (setup.py): started
+  Building wheel for SQLAlchemy (setup.py): finished with status 'done'
+  Stored in directory: /root/.cache/pip/wheels/6b/02/e3/7f1149be63131cdf6aaaa3330924a2683bb530188940569d66
+Successfully built SQLAlchemy
+Installing collected packages: click, itsdangerous, Werkzeug, MarkupSafe, Jinja2, flask, six, aniso8601, pytz, flask-restful, SQLAlchemy, flask-sqlalchemy, psycopg2-binary
+Successfully installed Jinja2-2.10.1 MarkupSafe-1.1.1 SQLAlchemy-1.3.3 Werkzeug-0.15.2 aniso8601-6.0.0 click-7.0 flask-1.0.2 flask-restful-0.3.7 flask-sqlalchemy-2.4.0 itsdangerous-1.1.0 psycopg2-binary-2.8.2 pytz-2019.1 six-1.12.0
+Removing intermediate container 81ec5fa0fde4
+ ---> c0e09efa6ab9
+Step 7/10 : ADD . /app
+ ---> 4a7e921afc13
+Step 8/10 : WORKDIR /app
+ ---> Running in 1fb849c69f41
+Removing intermediate container 1fb849c69f41
+ ---> a6a6d3cccbe3
+Step 9/10 : EXPOSE 5000
+ ---> Running in 31af1b187f0a
+Removing intermediate container 31af1b187f0a
+ ---> 217ae34d0b83
+Step 10/10 : CMD ["python", "taskapi.py"]
+ ---> Running in 3af1c2ee874b
+Removing intermediate container 3af1c2ee874b
+ ---> 03eff9cbf264
+Successfully built 03eff9cbf264
+Successfully tagged gcr.io/taskapi-239309/taskapi:0.0.1
