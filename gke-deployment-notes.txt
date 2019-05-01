@@ -465,7 +465,7 @@ cc7c954a8c83: Mounted from google-appengine/python
 *deploy taskapi and nginx using helm
 $ helm upgrade taskapi --install --wait taskapi \
 > --set image=$IMAGE_NAME,imageTag=$IMAGE_TAG \
-> --set database.host=$DATABASE_HOST \
+> --set database.host=$DATABASE_HOST_IP \
 > --set database.name=$DATABASE_NAME \
 > --set database.user=$DATABASE_USER,database.pass=$DATABASE_PASS
 Release "taskapi" does not exist. Installing it now.
@@ -504,6 +504,34 @@ taskapi-6bf95d455-5ghnj   1/1     Running   0          3m
 taskapi-6bf95d455-ddmd2   1/1     Running   0          3m
 taskapi-6bf95d455-q2jwt   1/1     Running   0          3m
 
+*(optional) recreate pods after performing some updates
+$ helm upgrade taskapi --recreate-pods --install --wait taskapi --set image=$IMAGE_NAME,imageTag=$IMAGE_TAG --set database.host=$DATABASE_HOST_IP --set database.name=$DATABASE_NAME --set database.user=$DATABASE_USER,database.pass=$DATABASE_PASS
+
+before:
+$ kubectl get pods
+NAME                      READY   STATUS        RESTARTS   AGE
+nginx-6f7c5bbd74-9c7jv    1/1     Running       0          1h
+nginx-6f7c5bbd74-jfst6    1/1     Running       0          1h
+nginx-6f7c5bbd74-lw2mj    1/1     Running       0          1h
+taskapi-6bf95d455-4br4b   1/1     Running       0          31s
+taskapi-6bf95d455-5d4nn   1/1     Running       0          31s
+taskapi-6bf95d455-5ghnj   1/1     Terminating   0          1h
+taskapi-6bf95d455-96qt4   1/1     Running       0          31s
+taskapi-6bf95d455-ddmd2   1/1     Terminating   0          1h
+taskapi-6bf95d455-q2jwt   1/1     Terminating   0          1h
+
+after:
+$ kubectl get pods
+NAME                      READY   STATUS    RESTARTS   AGE
+nginx-6f7c5bbd74-9c7jv    1/1     Running   0          1h
+nginx-6f7c5bbd74-jfst6    1/1     Running   0          1h
+nginx-6f7c5bbd74-lw2mj    1/1     Running   0          1h
+taskapi-6bf95d455-4br4b   1/1     Running   0          38s
+taskapi-6bf95d455-5d4nn   1/1     Running   0          38s
+taskapi-6bf95d455-96qt4   1/1     Running   0          38s
+
+
+
 *deploy nginx
 $ helm upgrade nginx --install --wait nginx
 Release "nginx" does not exist. Installing it now.
@@ -538,12 +566,52 @@ $ echo $API_HOST
 35.242.183.131
 
 11. test taskapi using curl
+
+*404 response http code -> user doesn't exist in DB
 $ curl -i -X GET http://$API_HOST/hello/John
-HTTP/1.1 500 INTERNAL SERVER ERROR
+HTTP/1.1 404 NOT FOUND
 Server: nginx/1.15.12
-Date: Wed, 01 May 2019 17:41:20 GMT
+Date: Wed, 01 May 2019 18:40:21 GMT
 Content-Type: application/json
-Content-Length: 37
+Content-Length: 35
 Connection: keep-alive
 
-{"message": "Internal Server Error"}
+{"message": "User John not found"}
+
+*201 response http code -> data created successfully in DB
+$ curl -i -H 'Content-Type: application/json' -X PUT -d '{"dateOfBirth": "2000-01-01"}' http://$API_HOST/hello/John
+HTTP/1.1 201 CREATED
+Server: nginx/1.15.12
+Date: Wed, 01 May 2019 18:42:12 GMT
+Content-Type: application/json
+Content-Length: 3
+Connection: keep-alive
+
+{}
+[nullx@centos-s-4vcpu-8gb-lon1-01 deploy]$ curl -i -X GET http://$API_HOST/hello/John
+HTTP/1.1 200 OK
+Server: nginx/1.15.12
+Date: Wed, 01 May 2019 18:44:34 GMT
+Content-Type: application/json
+Content-Length: 57
+Connection: keep-alive
+
+{"message": "Hello, John! Your birthday is in 245 days"}
+
+*204 response http code -> existing resource is modified in DB (e.g. set a new birthdate)
+$ curl -i -H 'Content-Type: application/json' -X PUT -d '{"dateOfBirth": "2000-09-09"}' http://$API_HOST/hello/John
+HTTP/1.1 204 NO CONTENT
+Server: nginx/1.15.12
+Date: Wed, 01 May 2019 18:50:59 GMT
+Content-Type: application/json
+Connection: keep-alive
+
+$ curl -i -X GET http://$API_HOST/hello/John
+HTTP/1.1 200 OK
+Server: nginx/1.15.12
+Date: Wed, 01 May 2019 18:51:29 GMT
+Content-Type: application/json
+Content-Length: 57
+Connection: keep-alive
+
+{"message": "Hello, John! Your birthday is in 131 days"}
