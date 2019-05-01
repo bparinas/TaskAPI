@@ -127,3 +127,104 @@ $ gcloud container clusters get-credentials taskapi-cluster
 Fetching cluster endpoint and auth data.
 kubeconfig entry generated for taskapi-cluster.
 
+
+$ kubectl create serviceaccount --namespace kube-system tiller
+serviceaccount/tiller created
+
+$ kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+clusterrolebinding.rbac.authorization.k8s.io/tiller-cluster-admin created
+
+
+* install helm
+
+$ curl -LO https://git.io/get_helm.sh
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  7028  100  7028    0     0  14234      0 --:--:-- --:--:-- --:--:-- 14234
+
+$ chmod 700 get_helm.sh
+
+$ ./get_helm.sh
+Downloading https://kubernetes-helm.storage.googleapis.com/helm-v2.13.1-linux-amd64.tar.gz
+Preparing to install helm and tiller into /usr/local/bin
+helm installed into /usr/local/bin/helm
+tiller installed into /usr/local/bin/tiller
+Run 'helm init' to configure helm.
+
+$ helm init --service-account tiller
+Creating /home/nullx/.helm
+Creating /home/nullx/.helm/repository
+Creating /home/nullx/.helm/repository/cache
+Creating /home/nullx/.helm/repository/local
+Creating /home/nullx/.helm/plugins
+Creating /home/nullx/.helm/starters
+Creating /home/nullx/.helm/cache/archive
+Creating /home/nullx/.helm/repository/repositories.yaml
+Adding stable repo with URL: https://kubernetes-charts.storage.googleapis.com
+Adding local repo with URL: http://127.0.0.1:8879/charts
+$HELM_HOME has been configured at /home/nullx/.helm.
+
+Tiller (the Helm server-side component) has been installed into your Kubernetes Cluster.
+
+Please note: by default, Tiller is deployed with an insecure 'allow unauthenticated users' policy.
+To prevent this, run `helm init` with the --tiller-tls-verify flag.
+For more information on securing your installation see: https://docs.helm.sh/using_helm/#securing-your-helm-installation
+Happy Helming!
+
+
+* create db instance with the postgresql engine
+https://cloud.google.com/sql/docs/postgres/create-instance
+$ gcloud sql instances create taskapi-psqldb --database-version=POSTGRES_9_6 --tier db-g1-small
+
+Creating Cloud SQL instance...done.
+Created [https://www.googleapis.com/sql/v1beta4/projects/taskapi-239309/instances/taskapi-psqldb].
+NAME            DATABASE_VERSION  LOCATION       TIER         PRIMARY_ADDRESS  PRIVATE_ADDRESS  STATUS
+taskapi-psqldb  POSTGRES_9_6      us-central1-a  db-g1-small  34.66.189.70     -                RUNNABLE
+
+
+* delete db instance (do not do this in production. GCP policy, you have to wait for 2 months before you can reuse the same instance name) 
+$ gcloud sql instances delete taskapi-db
+All of the instance data will be lost when the instance is deleted.
+
+Do you want to continue (Y/n)?  Y
+
+Deleting Cloud SQL instance...done.
+Deleted [https://www.googleapis.com/sql/v1beta4/projects/taskapi-239309/instances/taskapi-db].
+
+
+
+
+
+install google container registry's docker credential helper
+$ cat docker-credential-gcr.sh
+#!/bin/bash
+
+VERSION=1.5.0
+OS=linux
+ARCH=amd64
+curl -fsSL "https://github.com/GoogleCloudPlatform/docker-credential-gcr/releases/download/v${VERSION}/docker-credential-gcr_${OS}_${ARCH}-${VERSION}.tar.gz" \
+  | tar xz --to-stdout ./docker-credential-gcr \
+  | sudo tee /usr/bin/docker-credential-gcr > /dev/null && sudo chmod +x /usr/bin/docker-credential-gcr
+
+
+
+non-privileged account must be a member of docker group
+$ docker-credential-gcr configure-docker
+/home/nullx/.docker/config.json configured to use this credential helper for GCR registries
+
+$ cat /home/nullx/.docker/config.json
+{
+        "auths": {},
+        "credHelpers": {
+                "asia.gcr.io": "gcr",
+                "eu.gcr.io": "gcr",
+                "gcr.io": "gcr",
+                "marketplace.gcr.io": "gcloud",
+                "staging-k8s.gcr.io": "gcr",
+                "us.gcr.io": "gcr"
+        }
+}
+
+*install jq 
+$ sudo yum install -y jq
