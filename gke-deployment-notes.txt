@@ -10,8 +10,8 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 
-2. install gcloud cli 
-yum install -y google-cloud-sdk
+2. install gcloud & kubectl cli 
+yum install -y google-cloud-sdk kubectl
 
 3. before using gcloud set project & compute zone
 https://cloud.google.com/resource-manager/docs/creating-managing-projects
