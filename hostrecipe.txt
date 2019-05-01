@@ -12,3 +12,112 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
 
 2. install gcloud cli 
 yum install -y google-cloud-sdk
+
+3. before using gcloud set project & compute zone
+https://cloud.google.com/resource-manager/docs/creating-managing-projects
+https://cloud.google.com/compute/docs/regions-zones/#available
+
+initialize gcloud 
+$ gcloud init
+
+create project using gcloud
+$ gcloud projects create taskapi-239309
+
+show gcloud config
+$ gcloud config list
+[compute]
+region = europe-west2
+zone = europe-west2-b
+[core]
+account = bernard@arpa.ph
+disable_usage_reporting = True
+project = taskapi-239309
+
+Your active configuration is: [default]
+
+gcloud info
+$ gcloud info
+Google Cloud SDK [244.0.0]
+
+Platform: [Linux, x86_64] ('Linux', 'centos-s-4vcpu-8gb-lon1-01', '3.10.0-957.1.3.el7.x86_64', '#1 SMP Thu Nov 29 14:49:43 UTC 2                                                             018', 'x86_64', 'x86_64')
+Python Version: [2.7.5 (default, Apr  9 2019, 14:30:50)  [GCC 4.8.5 20150623 (Red Hat 4.8.5-36)]]
+Python Location: [/usr/bin/python2]
+Site Packages: [Disabled]
+
+Installation Root: [/usr/lib64/google-cloud-sdk]
+Installed Components:
+  core: [2019.04.26]
+  kubectl: [2019.04.26]
+  beta: [2019.04.26]
+  gsutil: [4.38]
+  bq: [2.0.43]
+  alpha: [2019.04.26]
+System PATH: [/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/nullx/.local/bin:/home/nullx/bin]
+Python PATH: [/usr/lib64/google-cloud-sdk/lib/third_party:/usr/lib64/google-cloud-sdk/lib:/usr/lib64/python27.zip:/usr/lib64/pyt                                                             hon2.7/:/usr/lib64/python2.7/plat-linux2:/usr/lib64/python2.7/lib-tk:/usr/lib64/python2.7/lib-old:/usr/lib64/python2.7/lib-dynlo                                                             ad]
+Cloud SDK on PATH: [False]
+Kubectl on PATH: [False]
+
+Installation Properties: [/usr/lib64/google-cloud-sdk/properties]
+User Config Directory: [/home/nullx/.config/gcloud]
+Active Configuration Name: [default]
+Active Configuration Path: [/home/nullx/.config/gcloud/configurations/config_default]
+
+Account: [bernard@arpa.ph]
+Project: [taskapi]
+
+Current Properties:
+  [core]
+    project: [taskapi]
+    account: [bernard@arpa.ph]
+    disable_usage_reporting: [True]
+
+Logs Directory: [/home/nullx/.config/gcloud/logs]
+Last Log File: [/home/nullx/.config/gcloud/logs/2019.05.01/09.36.54.965765.log]
+
+git: [git version 1.8.3.1]
+ssh: [OpenSSH_7.4p1, OpenSSL 1.0.2k-fips  26 Jan 2017]
+
+list a project 
+$ gcloud projects list
+PROJECT_ID      NAME     PROJECT_NUMBER
+taskapi-239309  taskapi  280061142917
+
+update project name
+$ gcloud projects update taskapi-239309 --name=TaskAPI
+Updated [https://cloudresourcemanager.googleapis.com/v1/projects/taskapi-239309].
+$ gcloud projects list
+PROJECT_ID      NAME     PROJECT_NUMBER
+taskapi-239309  TaskAPI  280061142917
+
+
+region and zone listing
+$ gcloud compute zones list --filter=region:europe-west2
+NAME            REGION        STATUS  NEXT_MAINTENANCE  TURNDOWN_DATE
+europe-west2-c  europe-west2  UP
+europe-west2-b  europe-west2  UP
+europe-west2-a  europe-west2  UP
+
+
+set region and zone
+$ gcloud config configurations list
+NAME     IS_ACTIVE  ACCOUNT          PROJECT         DEFAULT_ZONE  DEFAULT_REGION
+default  True       bernard@arpa.ph  taskapi-239309
+
+$ gcloud config set compute/region europe-west2
+Updated property [compute/region].
+$ gcloud config set compute/zone europe-west2-b
+Updated property [compute/zone].
+
+$ gcloud config configurations list
+NAME     IS_ACTIVE  ACCOUNT          PROJECT         DEFAULT_ZONE    DEFAULT_REGION
+default  True       bernard@arpa.ph  taskapi-239309  europe-west2-b  europe-west2
+
+4. create GKE cluster
+$ gcloud container clusters create taskapi-cluster --num-nodes=3 --machine-type=g1-small
+
+Creating cluster taskapi-cluster in europe-west2-b... Cluster is being health-checked (master is healthy)...done.
+Created [https://container.googleapis.com/v1/projects/taskapi-239309/zones/europe-west2-b/clusters/taskapi-cluster].
+To inspect the contents of your cluster, go to: https://console.cloud.google.com/kubernetes/workload_/gcloud/europe-west2-b/taskapi-cluster?project=taskapi-239309
+kubeconfig entry generated for taskapi-cluster.
+NAME             LOCATION        MASTER_VERSION  MASTER_IP      MACHINE_TYPE  NODE_VERSION  NUM_NODES  STATUS
+taskapi-cluster  europe-west2-b  1.11.8-gke.6    35.246.18.169  g1-small      1.11.8-gke.6  3          RUNNING
